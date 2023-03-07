@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TipCalculator</string>
+    <string name="split">Split</string>
+    <string name="enter_bill">Enter bill</string>
+    <string name="total_per_person">Total Per Person</string>
+    <string name="plus_or_minus">Plus or minus icon</string>
+    <string name="tip">Tip</string>
 </resources>

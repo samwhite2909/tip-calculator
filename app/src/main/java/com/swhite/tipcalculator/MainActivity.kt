@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+//Sets base for the UI of the activity.
 @Composable
 fun Application(content: @Composable () -> Unit) {
     TipCalculatorTheme() {
@@ -54,8 +56,10 @@ fun Application(content: @Composable () -> Unit) {
     }
 }
 
+//Creates the top header showing the total per person split.
 @Composable
 fun TopHeader(totalPerPerson: Double = 0.0) {
+    //Creates the background for the header.
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,19 +67,21 @@ fun TopHeader(totalPerPerson: Double = 0.0) {
             .padding(15.dp)
             .clip(shape = RoundedCornerShape(corner = CornerSize(12.dp))),
         color = Color(0xFFE9D7F7)
-    )
-    {
+    ) {
         Column(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            //Formatting the number to always be a double (currency).
             val total = "%.2f".format(totalPerPerson)
+            //Creates the total per person text.
             Text(
-                text = "Total Per Person",
+                text = stringResource(R.string.total_per_person),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.Black
             )
+            //Creates the value text for the total amount per person.
             Text(
                 text = "£$total",
                 style = MaterialTheme.typography.headlineLarge,
@@ -86,13 +92,13 @@ fun TopHeader(totalPerPerson: Double = 0.0) {
     }
 }
 
+//Creates the UI for the activity.
 @Composable
 fun MainContent() {
+    //State variables.
     val splitByState = remember {
         mutableStateOf(1)
     }
-
-    val range = IntRange(start = 1, endInclusive = 100)
 
     val tipAmountState = remember {
         mutableStateOf(0.0)
@@ -102,6 +108,9 @@ fun MainContent() {
         mutableStateOf(0.0)
     }
 
+    val range = IntRange(start = 1, endInclusive = 100)
+
+    //Creates the form for the bill and tip fields.
     BillForm(
         splitByState = splitByState,
         tipAmountState = tipAmountState,
@@ -109,6 +118,7 @@ fun MainContent() {
     )
 }
 
+//Creates the main form for the bill and tip fields.
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BillForm(
@@ -119,9 +129,11 @@ fun BillForm(
     totalPerPersonState: MutableState<Double>,
     onValChange: (String) -> Unit = {}
 ) {
+    //State variables.
     val totalBillState = remember {
         mutableStateOf("")
     }
+
     val validState = remember(totalBillState.value) {
         totalBillState.value.trim().isNotEmpty()
     }
@@ -131,6 +143,7 @@ fun BillForm(
     val sliderPositionState = remember {
         mutableStateOf(0f)
     }
+
     val tipPercentage = (sliderPositionState.value * 100).toInt()
 
     Column(
@@ -138,7 +151,10 @@ fun BillForm(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+        //Adds in the header.
         TopHeader(totalPerPerson = totalPerPersonState.value)
+
+        //Adds a background for the rest of the UI.
         Surface(
             modifier = modifier
                 .padding(2.dp)
@@ -151,9 +167,10 @@ fun BillForm(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
+                //Creates the bill text input.
                 InputField(
                     valueState = totalBillState,
-                    labelId = "Enter bill",
+                    labelId = stringResource(R.string.enter_bill),
                     enabled = true,
                     isSingleLine = true,
                     onAction = KeyboardActions {
@@ -162,13 +179,16 @@ fun BillForm(
 
                         keyboardController?.hide()
                     })
+
+                //Checks if we have a bill amount and displays the rest of the UI if we do.
                 if (validState) {
                     Row(
                         modifier = modifier.padding(3.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
+                        //Creates the split text.
                         Text(
-                            text = "Split",
+                            text = stringResource(R.string.split),
                             modifier = modifier.align(alignment = Alignment.CenterVertically)
                         )
                         Spacer(modifier = modifier.width(120.dp))
@@ -176,12 +196,15 @@ fun BillForm(
                             modifier = modifier.padding(horizontal = 3.dp),
                             horizontalArrangement = Arrangement.End
                         ) {
+                            //Creates the minus button.
                             RoundIconButton(
                                 imageVector = Icons.Default.Remove,
                                 onClick = {
+                                    //If we have more than one person, remove one.
                                     splitByState.value =
                                         if (splitByState.value > 1) splitByState.value - 1
                                         else 1
+                                    //Alter the total per person accordingly.
                                     totalPerPersonState.value =
                                         calculateTotalPerPerson(
                                             totalBill = totalBillState.value.toDouble(),
@@ -190,6 +213,7 @@ fun BillForm(
                                         )
                                 }
                             )
+                            //Creates the value for the text displaying the number of people in the split.
                             Text(
                                 text = "${splitByState.value}",
                                 modifier = modifier
@@ -202,9 +226,12 @@ fun BillForm(
                             RoundIconButton(
                                 imageVector = Icons.Default.Add,
                                 onClick = {
+                                    //If we are within the range of people, add one.
                                     if (splitByState.value < range.last) {
                                         splitByState.value = splitByState.value + 1
                                     }
+
+                                    //Alter the total per person accordingly.
                                     totalPerPersonState.value =
                                         calculateTotalPerPerson(
                                             totalBill = totalBillState.value.toDouble(),
@@ -215,20 +242,20 @@ fun BillForm(
                             )
                         }
                     }
-
-                    //Tip row
                     Row(
                         modifier = modifier.padding(
                             horizontal = 3.dp,
                             vertical = 12.dp
                         )
                     ) {
+                        //Creates the tip text.
                         Text(
-                            text = "Tip",
+                            text = stringResource(R.string.tip),
                             modifier = modifier.align(alignment = Alignment.CenterVertically)
                         )
                         Spacer(modifier = modifier.width(200.dp))
 
+                        //Creates the value of the tip amount.
                         Text(
                             text = "£${tipAmountState.value}",
                             modifier = modifier.align(alignment = Alignment.CenterVertically)
@@ -239,11 +266,11 @@ fun BillForm(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        //Creates the text for the tip percentage, adjusted to by the slider.
                         Text(text = "${tipPercentage}%")
-
                         Spacer(modifier = modifier.height(14.dp))
 
-                        //Slider
+                        //Allows the user to adjust the value of the tip between 0 - 100%.
                         Slider(
                             value = sliderPositionState.value,
                             onValueChange = { newVal ->
@@ -275,6 +302,7 @@ fun BillForm(
     }
 }
 
+//Shows preview.
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {

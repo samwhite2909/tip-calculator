@@ -11,11 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.swhite.tipcalculator.R
 
 val IconButtonSizeModifier = Modifier.size(40.dp)
 
+//Creates a generic circular button, used for plus and minus buttons.
 @Composable
 fun RoundIconButton(
     modifier: Modifier = Modifier,
@@ -36,7 +39,7 @@ fun RoundIconButton(
     ) {
         Icon(
             imageVector = imageVector,
-            contentDescription = "Plus or minus icon", tint = tint
+            contentDescription = stringResource(R.string.plus_or_minus), tint = tint
         )
     }
 
